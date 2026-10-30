@@ -1,0 +1,14 @@
+{
+  "name": "clinical-biometrics-radar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static clinical-trial biometrics intelligence board: one index.html + one data.json.",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "test": "node tests/render.test.js && node tests/degrade.test.js",
+    "check": "python3 scripts/merge_items.py --check"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

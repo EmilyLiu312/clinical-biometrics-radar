@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>临床试验 Biometrics 情报工作台</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f4f6fb;color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 56px}
+
+  .hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;padding:24px 26px;border-radius:16px;background:linear-gradient(135deg,#e9f0ff 0%,#f7f9ff 55%,#ecfaf6 100%);border:1px solid #e1e8f5}
+  .kicker{font-size:10.5px;letter-spacing:.2em;color:#1d4ed8;font-weight:700}
+  .hero h1{font-size:25px;margin:9px 0 8px;letter-spacing:-.02em;line-height:1.3}
+  .sub{margin:0;color:#5b6b85;font-size:13px;line-height:1.75;max-width:660px}
+  .hero-meta{text-align:right;min-width:168px;flex-shrink:0}
+  .meta-label{font-size:10.5px;color:#7b8aa3;letter-spacing:.1em}
+  .meta-value{font-size:19px;font-weight:700;margin-top:5px;letter-spacing:-.01em}
+  .meta-note{font-size:11px;color:#8b98ad;margin-top:6px}
+
+  .snap-note{display:none;margin-top:12px;background:#f2f6fd;border:1px solid #e2e8f5;color:#64748b;border-radius:10px;padding:9px 13px;font-size:11.5px;line-height:1.65}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:16px 0 18px}
+  .kpi{background:#fff;border:1px solid #e6ebf5;border-radius:12px;padding:15px 17px;position:relative;overflow:hidden}
+  .kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#1d4ed8}
+  .kpi.k2:before{background:#0d9488}
+  .kpi.k3:before{background:#dc2626}
+  .kpi.k4:before{background:#d97706}
+  .kpi-num{font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .kpi-label{font-size:11.5px;color:#6b7a92;margin-top:3px}
+
+  .layout{display:grid;grid-template-columns:1fr 318px;gap:18px;align-items:start}
+  .toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{font-size:12.5px;padding:7px 13px;border-radius:999px;border:1px solid #dfe6f2;background:#fff;color:#4a5a73;cursor:pointer;font-family:inherit;transition:all .15s}
+  .chip:hover{border-color:#b9c7de}
+  .chip.on{background:#1d4ed8;border-color:#1d4ed8;color:#fff;font-weight:600}
+  .chip .cn{opacity:.65;font-size:11px;margin-left:3px}
+  .search input{width:228px;padding:8px 12px;border-radius:9px;border:1px solid #dfe6f2;background:#fff;font-size:12.5px;font-family:inherit;outline:none;transition:all .15s}
+  .search input:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(29,78,216,.09)}
+
+  .group-label{display:flex;align-items:center;gap:9px;font-size:12px;color:#6b7a92;margin:20px 0 10px}
+  .group-label .dot{width:7px;height:7px;border-radius:50%;background:#0d9488;flex-shrink:0}
+  .group-label .cnt{background:#eef2fa;border-radius:6px;padding:1px 7px;font-size:10.5px;color:#5b6b85}
+
+  .card{background:#fff;border:1px solid #e6ebf5;border-radius:13px;padding:15px 17px;margin-bottom:10px;transition:box-shadow .18s,border-color .18s}
+  .card:hover{box-shadow:0 6px 22px rgba(15,23,42,.07);border-color:#d5deee}
+  .card-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;flex-wrap:wrap}
+  .badge{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+  .cat-ai{background:#f3e8ff;color:#7c3aed}
+  .cat-fda{background:#fee2e2;color:#b91c1c}
+  .cat-cdisc{background:#ccfbf1;color:#0f766e}
+  .cat-ind{background:#fef3c7;color:#b45309}
+  .cat-other{background:#eef2fa;color:#64748b}
+  .imp{font-size:10.5px;color:#7b8aa3;display:inline-flex;align-items:center;gap:5px}
+  .imp .pip{width:6px;height:6px;border-radius:50%;background:#94a3b8;display:inline-block}
+  .imp-h .pip{background:#dc2626}
+  .imp-m .pip{background:#d97706}
+  .imp-l .pip{background:#94a3b8}
+  .n-date{font-size:11px;color:#8b98ad;margin-left:auto;font-variant-numeric:tabular-nums}
+  .n-collected{display:none}
+  .n-title{font-size:15px;line-height:1.55;margin:0 0 6px;font-weight:650;color:#111c33}
+  .n-summary{margin:0 0 10px;font-size:12.5px;line-height:1.78;color:#42536b}
+  .impact{background:#f7f9fd;border-left:3px solid #0d9488;border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:10px}
+  .impact-label{display:block;font-size:10px;letter-spacing:.08em;color:#0d9488;font-weight:700;margin-bottom:3px}
+  .n-impact{margin:0;font-size:12px;line-height:1.72;color:#3f5069}
+  .card-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;color:#8b98ad;border-top:1px dashed #eef1f8;padding-top:9px}
+  .n-source{color:#6b7a92;font-weight:500}
+  .n-tags{display:flex;gap:5px;flex-wrap:wrap}
+  .tag{background:#f1f4fa;color:#64748b;border-radius:5px;padding:1px 6px;font-size:10px}
+  .n-deadline{color:#b45309;font-weight:600}
+  .n-link{margin-left:auto;color:#1d4ed8;text-decoration:none;font-weight:600;white-space:nowrap}
+  .n-link:hover{text-decoration:underline}
+
+  aside .panel{background:#fff;border:1px solid #e6ebf5;border-radius:13px;padding:14px 16px;margin-bottom:13px}
+  aside h3{font-size:12px;margin:0 0 10px;color:#334155;letter-spacing:.03em;font-weight:650}
+  .dl{display:flex;gap:9px;padding:8px 0;border-bottom:1px dashed #eef1f8;align-items:flex-start}
+  .dl:last-child{border-bottom:none;padding-bottom:0}
+  .dl-date{font-variant-numeric:tabular-nums;color:#475569;font-weight:700;min-width:54px;font-size:11.5px;padding-top:1px;white-space:nowrap}
+  .dl-body{flex:1;min-width:0}
+  .dl-title{color:#42536b;line-height:1.5;font-size:11.5px;display:block}
+  .dl-left{font-size:10px;padding:1px 6px;border-radius:5px;white-space:nowrap;display:inline-block;margin-top:4px}
+  .dl-left.urgent{background:#fee2e2;color:#b91c1c}
+  .dl-left.soon{background:#fef3c7;color:#b45309}
+  .dl-left.later{background:#eef2fa;color:#64748b}
+  .dist-row{margin-bottom:10px}
+  .dist-row:last-child{margin-bottom:0}
+  .dist-top{display:flex;justify-content:space-between;font-size:11.5px;color:#5b6b85;margin-bottom:4px}
+  .dist-bar{height:6px;border-radius:3px;background:#eef2fa;overflow:hidden}
+  .dist-fill{height:100%;border-radius:3px}
+  .hint{font-size:11px;line-height:1.75;color:#8b98ad}
+  .empty{background:#fff;border:1px dashed #d8e0ee;border-radius:13px;padding:44px 20px;text-align:center;color:#8b98ad;font-size:13px}
+  .loading{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #e6ebf5;border-radius:13px;padding:22px;color:#8b98ad;font-size:13px;margin-top:16px}
+  .spinner{width:13px;height:13px;border:2px solid #dbe3f0;border-top-color:#1d4ed8;border-radius:50%;animation:sp .8s linear infinite;flex-shrink:0}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .tpl{display:none}
+  .foot{margin-top:22px;font-size:11px;color:#98a4b8;text-align:center;line-height:1.8}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .hero{flex-direction:column;align-items:flex-start}
+    .hero-meta{text-align:left}
+    .search input{width:100%}
+    .search{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div>
+      <div class="kicker">CLINICAL BIOMETRICS · DAILY BRIEF</div>
+      <h1>临床试验 Biometrics 情报工作台</h1>
+      <p class="sub">汇总 FDA / ICH / EMA 指南、CDISC 数据标准（SDTMIG / ADaMIG / Define-XML / CORE）与影响统计编程交付的行业信号，并逐条标注「对统计编程的影响」。</p>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-label">最近更新</div>
+      <div class="meta-value" id="lastUpdated">—</div>
+      <div class="meta-note">数据源 · Biometrics情报库</div>
+    </div>
+  </header>
+
+  <div id="snapNote" class="snap-note"></div>
+
+  <section class="kpis">
+    <div class="kpi k1">
+      <div class="kpi-num" id="kpiTotal">0</div>
+      <div class="kpi-label">累计情报</div>
+    </div>
+    <div class="kpi k2">
+      <div class="kpi-num" id="kpiToday">0</div>
+      <div class="kpi-label">本期新增</div>
+    </div>
+    <div class="kpi k3">
+      <div class="kpi-num" id="kpiHigh">0</div>
+      <div class="kpi-label">高优先级</div>
+    </div>
+    <div class="kpi k4">
+      <div class="kpi-num" id="kpiDue">0</div>
+      <div class="kpi-label">30 天内截止</div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <main>
+      <div class="toolbar">
+        <div class="chips" id="chips"></div>
+        <div class="search"><input id="q" type="search" placeholder="搜索标题 / 摘要 / 标签"></div>
+      </div>
+      <div id="loading" class="loading"><span class="spinner"></span>正在加载情报…</div>
+      <div id="list"></div>
+      <div id="empty" class="empty" hidden>暂无匹配的情报。</div>
+    </main>
+
+    <aside>
+      <div class="panel">
+        <h3>近期关键截止</h3>
+        <div id="deadlines"><div class="hint">暂无需要关注的截止日。</div></div>
+      </div>
+      <div class="panel">
+        <h3>分类分布</h3>
+        <div id="dist"><div class="hint">—</div></div>
+      </div>
+      <div class="panel">
+        <h3>使用说明</h3>
+        <div class="hint">条目来自 FDA、CDISC、ICH 等机构的公开信息，按收录日期分组。摘要与判断为二次加工，关键结论请以原文链接为准。</div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">纯静态看板 · 数据来自 data.json<br>内容为信息汇总，不构成合规或申报建议</div>
+</div>
+
+<div id="cardTpl" class="tpl" aria-hidden="true">
+  <article class="card">
+    <div class="card-head">
+      <span class="badge n-cat"></span>
+      <span class="imp n-imp"><span class="pip"></span><span class="imp-txt"></span></span>
+      <span class="n-date"></span>
+      <span class="n-collected"></span>
+    </div>
+    <h3 class="n-title"></h3>
+    <p class="n-summary"></p>
+    <div class="impact">
+      <span class="impact-label">对统计编程的影响</span>
+      <p class="n-impact"></p>
+    </div>
+    <div class="card-foot">
+      <span class="n-source"></span>
+      <span class="n-tags"></span>
+      <span class="n-deadline"></span>
+      <a class="n-link" href="#" target="_blank" rel="noopener">原文 →</a>
+    </div>
+  </article>
+</div>
+
+<script>
+(function () {
+  var F = {
+    title: 'title', cat: 'category', imp: 'importance', sum: 'summary',
+    impact: 'impact', src: 'source', link: 'url',
+    tags: 'tags', pub: 'published', due: 'deadline', col: 'collected'
+  };
+  var CAT_COLOR = { 'AI产品动态': '#7c3aed', 'FDA与法规': '#b91c1c', 'CDISC与标准': '#0d9488', '行业与会议': '#b45309' };
+  var HIDDEN_CATS = {};  // 不想展示的分类写在这里，例如 { 'AI产品动态': 1 }
+  var CAT_CLASS = { 'AI产品动态': 'cat-ai', 'FDA与法规': 'cat-fda', 'CDISC与标准': 'cat-cdisc', '行业与会议': 'cat-ind' };
+  var IMP_CLASS = { '高': 'imp-h', '中': 'imp-m', '低': 'imp-l' };
+  var IMP_RANK = { '高': 0, '中': 1, '低': 2 };
+
+  var state = { rows: [], cat: '全部', q: '' };
+  var tplCard = document.querySelector('#cardTpl .card');
+
+  function mark(el) {
+    // 静态版不需要平台绑定，保留空实现以免调用点报错
+  }
+
+  function d10(s) {
+    if (s === null || s === undefined || s === '') return '';
+    if (Object.prototype.toString.call(s) === '[object Date]') {
+      if (isNaN(s.getTime())) return '';
+      return s.getFullYear() + '-' + pad(s.getMonth() + 1) + '-' + pad(s.getDate());
+    }
+    if (typeof s === 'number') {
+      var dd = new Date(s);
+      return dd.getFullYear() + '-' + pad(dd.getMonth() + 1) + '-' + pad(dd.getDate());
+    }
+    return String(s).slice(0, 10);
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function toDate(s) {
+    var t = d10(s);
+    if (!t || t.length < 10) return null;
+    var p = t.split('-');
+    var dt = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+  function cnDate(s) {
+    var t = d10(s);
+    if (!t || t.length < 10) return '';
+    var p = t.split('-');
+    return p[0] + '年' + parseInt(p[1], 10) + '月' + parseInt(p[2], 10) + '日';
+  }
+  function shortDate(s) {
+    var t = d10(s);
+    if (!t || t.length < 10) return '';
+    var p = t.split('-');
+    return parseInt(p[1], 10) + '月' + parseInt(p[2], 10) + '日';
+  }
+  function mdOf(dt) {
+    if (!dt || isNaN(dt.getTime())) return '';
+    var y = dt.getFullYear();
+    var m = dt.getMonth() + 1;
+    var d = dt.getDate();
+    var base = m + '月' + d + '日';
+    return y === today0().getFullYear() ? base : (y + '年' + base);
+  }
+  function today0() {
+    var n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+  function daysFrom(dt) {
+    if (!dt) return null;
+    return Math.round((dt.getTime() - today0().getTime()) / 86400000);
+  }
+  function textOf(v) {
+    if (v === null || v === undefined) return '';
+    if (Object.prototype.toString.call(v) === '[object Array]') {
+      for (var i = 0; i < v.length; i++) {
+        var one = textOf(v[i]);
+        if (one) return one;
+      }
+      return '';
+    }
+    if (typeof v === 'object') {
+      if (v.link) return String(v.link);
+      if (v.text) return String(v.text);
+      return '';
+    }
+    return String(v);
+  }
+
+  function buildCard(r) {
+    var node = tplCard.cloneNode(true);
+
+    var cat = r[F.cat] ? String(r[F.cat]) : '未分类';
+    var catEl = node.querySelector('.n-cat');
+    catEl.textContent = cat;
+    catEl.className = 'badge n-cat ' + (CAT_CLASS[cat] || 'cat-other');
+    mark(catEl);
+
+    var imp = r[F.imp] ? String(r[F.imp]) : '';
+    var impEl = node.querySelector('.n-imp');
+    impEl.className = 'imp n-imp ' + (IMP_CLASS[imp] || '');
+    var impTxt = impEl.querySelector('.imp-txt');
+    if (impTxt) impTxt.textContent = imp ? ('重要度 ' + imp) : '未评级';
+    mark(impEl);
+
+    var dateEl = node.querySelector('.n-date');
+    dateEl.textContent = shortDate(r[F.pub]);
+    mark(dateEl);
+
+    var colEl = node.querySelector('.n-collected');
+    colEl.textContent = d10(r[F.col]);
+    mark(colEl);
+
+    var titleEl = node.querySelector('.n-title');
+    titleEl.textContent = r[F.title] ? String(r[F.title]) : '（无标题）';
+    mark(titleEl);
+
+    var sumEl = node.querySelector('.n-summary');
+    sumEl.textContent = r[F.sum] ? String(r[F.sum]) : '';
+    mark(sumEl);
+
+    var impactEl = node.querySelector('.n-impact');
+    var impact = r[F.impact] ? String(r[F.impact]) : '';
+    impactEl.textContent = impact;
+    mark(impactEl);
+    if (!impact) {
+      var box = node.querySelector('.impact');
+      if (box) box.style.display = 'none';
+    }
+
+    var srcEl = node.querySelector('.n-source');
+    srcEl.textContent = r[F.src] ? String(r[F.src]) : '';
+    mark(srcEl);
+
+    var tagsEl = node.querySelector('.n-tags');
+    var rawTags = r[F.tags];
+    var parts = Object.prototype.toString.call(rawTags) === '[object Array]'
+      ? rawTags
+      : (rawTags ? String(rawTags).split(/[,，;；]/) : []);
+    var shown = 0;
+    for (var i = 0; i < parts.length; i++) {
+      var t = String(parts[i]).replace(/^\s+|\s+$/g, '');
+      if (!t) continue;
+      var sp = document.createElement('span');
+      sp.className = 'tag';
+      sp.textContent = t;
+      tagsEl.appendChild(sp);
+      shown++;
+    }
+    mark(tagsEl);
+
+    var dueEl = node.querySelector('.n-deadline');
+    var due = d10(r[F.due]);
+    if (due) {
+      dueEl.textContent = '关注截止 ' + shortDate(due);
+    } else {
+      dueEl.style.display = 'none';
+    }
+    mark(dueEl);
+
+    var linkEl = node.querySelector('.n-link');
+    var url = textOf(r[F.link]);
+    if (url && url.indexOf('http') === 0) {
+      linkEl.setAttribute('href', url);
+    } else {
+      linkEl.style.display = 'none';
+    }
+
+    return node;
+  }
+
+  function renderStats(rows) {
+    var total = rows.length;
+    var maxCol = '';
+    var high = 0;
+    var dueSoon = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var c = d10(rows[i][F.col]);
+      if (c > maxCol) maxCol = c;
+      if (String(rows[i][F.imp] || '') === '高') high++;
+      var dl = daysFrom(toDate(rows[i][F.due]));
+      if (dl !== null && dl >= 0 && dl <= 30) dueSoon++;
+    }
+    var cur = 0;
+    for (var j = 0; j < rows.length; j++) {
+      if (d10(rows[j][F.col]) === maxCol) cur++;
+    }
+    document.getElementById('kpiTotal').textContent = total;
+    document.getElementById('kpiToday').textContent = cur;
+    document.getElementById('kpiHigh').textContent = high;
+    document.getElementById('kpiDue').textContent = dueSoon;
+    document.getElementById('lastUpdated').textContent = maxCol ? cnDate(maxCol) : '—';
+  }
+
+  function makeChip(label, count, active, value) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (active ? ' on' : '');
+    b.appendChild(document.createTextNode(label));
+    var cn = document.createElement('span');
+    cn.className = 'cn';
+    cn.textContent = count;
+    b.appendChild(cn);
+    b.onclick = function () { state.cat = value; render(); };
+    return b;
+  }
+
+  function renderChips(rows) {
+    var counts = {};
+    var order = [];
+    for (var i = 0; i < rows.length; i++) {
+      var c = rows[i][F.cat] ? String(rows[i][F.cat]) : '未分类';
+      if (!counts[c]) { counts[c] = 0; order.push(c); }
+      counts[c]++;
+    }
+    var box = document.getElementById('chips');
+    while (box.firstChild) { box.removeChild(box.firstChild); }
+    box.appendChild(makeChip('全部', rows.length, state.cat === '全部', '全部'));
+    for (var k = 0; k < order.length; k++) {
+      box.appendChild(makeChip(order[k], counts[order[k]], state.cat === order[k], order[k]));
+    }
+  }
+
+  function renderDeadlines(rows) {
+    var items = [];
+    for (var i = 0; i < rows.length; i++) {
+      var dt = toDate(rows[i][F.due]);
+      if (!dt) continue;
+      var d = daysFrom(dt);
+      if (d === null || d < 0) continue;
+      items.push({ d: d, dt: dt, title: String(rows[i][F.title] || ''), url: textOf(rows[i][F.link]) });
+    }
+    items.sort(function (a, b) { return a.d - b.d; });
+    var box = document.getElementById('deadlines');
+    if (!items.length) {
+      box.innerHTML = '<div class="hint">暂无需要关注的截止日。</div>';
+      return;
+    }
+    box.innerHTML = '';
+    for (var j = 0; j < items.length && j < 6; j++) {
+      var it = items[j];
+      var row = document.createElement('div');
+      row.className = 'dl';
+
+      var dEl = document.createElement('div');
+      dEl.className = 'dl-date';
+      dEl.textContent = mdOf(it.dt);
+      mark(dEl);
+
+      var body = document.createElement('div');
+      body.className = 'dl-body';
+
+      var tEl = document.createElement('span');
+      tEl.className = 'dl-title';
+      tEl.textContent = it.title;
+      mark(tEl);
+
+      var lEl = document.createElement('span');
+      var cls = it.d <= 7 ? 'urgent' : (it.d <= 30 ? 'soon' : 'later');
+      lEl.className = 'dl-left ' + cls;
+      lEl.textContent = it.d === 0 ? '今天截止' : ('还剩 ' + it.d + ' 天');
+      mark(lEl);
+
+      body.appendChild(tEl);
+      body.appendChild(lEl);
+      row.appendChild(dEl);
+      row.appendChild(body);
+      if (it.url && it.url.indexOf('http') === 0) {
+        row.style.cursor = 'pointer';
+        row.onclick = (function (u) { return function () { window.open(u, '_blank'); }; })(it.url);
+      }
+      box.appendChild(row);
+    }
+  }
+
+  function renderDist(rows) {
+    var counts = {};
+    var order = [];
+    for (var i = 0; i < rows.length; i++) {
+      var c = rows[i][F.cat] ? String(rows[i][F.cat]) : '未分类';
+      if (!counts[c]) { counts[c] = 0; order.push(c); }
+      counts[c]++;
+    }
+    order.sort(function (a, b) { return counts[b] - counts[a]; });
+    var box = document.getElementById('dist');
+    if (!order.length) { box.innerHTML = '<div class="hint">—</div>'; return; }
+    box.innerHTML = '';
+    for (var j = 0; j < order.length; j++) {
+      var cat = order[j];
+      var pct = Math.round(counts[cat] / rows.length * 100);
+      var wrap = document.createElement('div');
+      wrap.className = 'dist-row';
+
+      var top = document.createElement('div');
+      top.className = 'dist-top';
+      var nm = document.createElement('span');
+      nm.textContent = cat;
+      mark(nm);
+      var num = document.createElement('span');
+      num.textContent = counts[cat];
+      mark(num);
+      top.appendChild(nm);
+      top.appendChild(num);
+
+      var bar = document.createElement('div');
+      bar.className = 'dist-bar';
+      var fill = document.createElement('div');
+      fill.className = 'dist-fill';
+      fill.style.width = Math.max(pct, 4) + '%';
+      fill.style.background = CAT_COLOR[cat] || '#94a3b8';
+      bar.appendChild(fill);
+
+      wrap.appendChild(top);
+      wrap.appendChild(bar);
+      box.appendChild(wrap);
+    }
+  }
+
+  function applyFilter() {
+    var out = [];
+    var q = state.q.toLowerCase();
+    for (var i = 0; i < state.rows.length; i++) {
+      var r = state.rows[i];
+      if (state.cat !== '全部' && String(r[F.cat] || '未分类') !== state.cat) continue;
+      if (q) {
+        var hay = (String(r[F.title] || '') + ' ' + String(r[F.sum] || '') + ' ' +
+          String(r[F.tags] || '') + ' ' + String(r[F.src] || '') + ' ' +
+          String(r[F.impact] || '')).toLowerCase();
+        if (hay.indexOf(q) < 0) continue;
+      }
+      out.push(r);
+    }
+    return out;
+  }
+
+  function render() {
+    renderChips(state.rows);
+    var rows = applyFilter();
+    var list = document.getElementById('list');
+    list.innerHTML = '';
+    document.getElementById('empty').hidden = rows.length > 0;
+
+    var groups = {};
+    var order = [];
+    for (var i = 0; i < rows.length; i++) {
+      var key = d10(rows[i][F.col]) || '未标注日期';
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(rows[i]);
+    }
+    order.sort(function (a, b) { return a < b ? 1 : (a > b ? -1 : 0); });
+
+    for (var g = 0; g < order.length; g++) {
+      var key = order[g];
+      var items = groups[key];
+      items.sort(function (a, b) {
+        var ra = IMP_RANK[String(a[F.imp] || '')];
+        var rb = IMP_RANK[String(b[F.imp] || '')];
+        if (ra === undefined) ra = 9;
+        if (rb === undefined) rb = 9;
+        if (ra !== rb) return ra - rb;
+        var da = d10(a[F.pub]) || '';
+        var db = d10(b[F.pub]) || '';
+        return da < db ? 1 : (da > db ? -1 : 0);
+      });
+
+      var gl = document.createElement('div');
+      gl.className = 'group-label';
+      var dot = document.createElement('span');
+      dot.className = 'dot';
+      var lab = document.createElement('span');
+      lab.textContent = key === '未标注日期' ? '未标注日期' : (cnDate(key) + ' · 收录');
+      var cnt = document.createElement('span');
+      cnt.className = 'cnt';
+      cnt.textContent = items.length + ' 条';
+      gl.appendChild(dot);
+      gl.appendChild(lab);
+      gl.appendChild(cnt);
+      list.appendChild(gl);
+
+      for (var k = 0; k < items.length; k++) {
+        list.appendChild(buildCard(items[k]));
+      }
+    }
+  }
+
+  function hideLoading() {
+    var el = document.getElementById('loading');
+    if (el) el.style.display = 'none';
+  }
+
+  function showEmpty(msg) {
+    hideLoading();
+    var el = document.getElementById('empty');
+    el.textContent = msg;
+    el.hidden = false;
+  }
+
+  function done(rows) {
+    hideLoading();
+    var kept = [];
+    for (var hi = 0; hi < rows.length; hi++) {
+      if (!HIDDEN_CATS[String(rows[hi][F.cat] || '')]) kept.push(rows[hi]);
+    }
+    rows = kept;
+    state.rows = rows;
+    if (!rows.length) {
+      showEmpty('还没有数据。把条目写进 data.json，或用 scripts/merge_items.py 合并 inbox.json，就会显示在这里。');
+      document.getElementById('chips').innerHTML = '';
+      return;
+    }
+    renderStats(rows);
+    renderDeadlines(rows);
+    renderDist(rows);
+    render();
+  }
+
+  var qEl = document.getElementById('q');
+  var timer = null;
+  qEl.addEventListener('input', function () {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(function () {
+      state.q = qEl.value.replace(/^\s+|\s+$/g, '');
+      render();
+    }, 220);
+  });
+
+  fetch('data.json', { cache: 'no-store' })
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      var items = (data && data.items) || [];
+      done(items);
+      var note = document.getElementById('snapNote');
+      if (note && data && data.updated) {
+        note.style.display = 'block';
+        note.textContent = '数据更新至 ' + cnDate(data.updated) + ' · 条目链接均指向原始来源，摘要为二次加工';
+      }
+    })
+    .catch(function (err) {
+      console.error('[data] 加载失败:', err);
+      showEmpty('data.json 加载失败。若是直接双击打开的本地文件，浏览器会拦截 fetch，' +
+        '请在目录下执行 python3 -m http.server 后访问 http://localhost:8000 。');
+    });
+})();
+</script>
+</body>
+</html>

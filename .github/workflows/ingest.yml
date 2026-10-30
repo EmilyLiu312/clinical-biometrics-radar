@@ -1,0 +1,43 @@
+name: Ingest items
+
+# 把 inbox.json 里的新条目合并进 data.json，然后提交。
+# 触发方式：手动运行，或往仓库推一个 inbox.json。
+#
+# 上游「搜索 + 判断」不在这个 workflow 里做 —— 那一步需要能联网检索并做编辑判断的
+# agent（WorkBuddy skill、或任意带联网能力的 LLM 流水线）。它产出 inbox.json，
+# 剩下的入库卫生（校验、去重、排序）交给这个 workflow。
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "inbox.json"
+
+permissions:
+  contents: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Merge inbox into data.json
+        run: python3 scripts/merge_items.py --inbox inbox.json
+
+      - name: Commit
+        run: |
+          rm -f inbox.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore: ingest items $(date -u +%F)"
+            git push
+          fi

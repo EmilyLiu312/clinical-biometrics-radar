@@ -1,0 +1,10 @@
+# 上游 agent 产出的临时条目，合并后即删
+inbox.json
+# 本地预览产物
+_site/
+# 测试依赖
+node_modules/
+package-lock.json
+.DS_Store
+__pycache__/
+*.pyc
