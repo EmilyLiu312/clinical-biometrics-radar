@@ -2,6 +2,8 @@
 
 临床试验 biometrics 情报看板 —— 每天自动汇总 **FDA / ICH / EMA 指南**、**CDISC 数据标准**（SDTMIG / ADaMIG / Define-XML / CORE）、**统计编程行业信号**，每条都替读者判断一次：**要不要动手**。
 
+**在线预览** → https://emilyliu312.github.io/clinical-biometrics-radar/
+
 纯静态站点：一个 `index.html` + 一个 `data.json`，无框架、无构建、无后端。
 
 ```
